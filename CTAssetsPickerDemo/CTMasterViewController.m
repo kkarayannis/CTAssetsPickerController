@@ -97,6 +97,17 @@
     picker.assetsFilter = [ALAssetsFilter allAssets];
     picker.delegate = self;
     
+    // only allow video clips if they are at least 5s
+    picker.filterPredicate = [NSPredicate predicateWithBlock:^BOOL(ALAsset* asset, NSDictionary *bindings) {
+        if ([[asset valueForProperty:ALAssetPropertyType] isEqual:ALAssetTypeVideo]) {
+            NSTimeInterval duration = [[asset valueForProperty:ALAssetPropertyDuration] doubleValue];
+            return duration >= 5;
+        } else {
+            return YES;
+        }
+    }];
+    
+    
     [self presentViewController:picker animated:YES completion:NULL];
 }
 

@@ -46,6 +46,10 @@
 /// The maximum number of assets to be picked.
 @property (nonatomic, assign) NSInteger maximumNumberOfSelection;
 
+/// Set the filterPredicate to filter assets to be picked.
+@property (nonatomic, strong) NSPredicate *filterPredicate;
+
+
 /**
  Determines whether or not the cancel button is visible in the picker
  @discussion The cancel button is visible by default. To hide the cancel button, (e.g. presenting the picker in UIPopoverController)

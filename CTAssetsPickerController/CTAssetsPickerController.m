@@ -73,13 +73,14 @@
 
 @interface CTAssetsGroupViewCell : UITableViewCell
 
-- (void)bind:(ALAssetsGroup *)assetsGroup;
+- (void)bind:(ALAssetsGroup *)assetsGroup filter:(NSPredicate *)filter;
 
 @end
 
 @interface CTAssetsGroupViewCell ()
 
 @property (nonatomic, strong) ALAssetsGroup *assetsGroup;
+@property (nonatomic, assign) NSInteger numberOfAssets;
 
 @end
 
@@ -134,6 +135,7 @@
         _assetsFilter               = [ALAssetsFilter allAssets];
         _showsCancelButton          = YES;
         _showsEmptyGroups           = NO;
+        _filterPredicate            = [NSPredicate predicateWithValue:YES];
         
         if ([self respondsToSelector:@selector(setContentSizeForViewInPopover:)])
             [self setContentSizeForViewInPopover:kPopoverContentSize];
@@ -386,13 +388,15 @@
 {
     static NSString *CellIdentifier = @"Cell";
     
+    CTAssetsPickerController *picker = (CTAssetsPickerController *)self.navigationController;
     CTAssetsGroupViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
     if (cell == nil)
     {
         cell = [[CTAssetsGroupViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
     
-    [cell bind:[self.groups objectAtIndex:indexPath.row]];
+    [cell bind:[self.groups objectAtIndex:indexPath.row] filter:picker.filterPredicate];
     
     return cell;
 }
@@ -429,14 +433,24 @@
 
 
 
+
 #pragma mark - CTAssetsGroupViewCell
 
 @implementation CTAssetsGroupViewCell
 
-
-- (void)bind:(ALAssetsGroup *)assetsGroup
+- (void)bind:(ALAssetsGroup *)assetsGroup filter:(NSPredicate *)filter
 {
     self.assetsGroup            = assetsGroup;
+    
+    // Calculate filtered assets
+    __block NSInteger numberOfAssets = 0;
+    
+    [self.assetsGroup enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
+        if (asset && [filter evaluateWithObject:asset])
+            numberOfAssets ++;
+    }];
+    
+    self.numberOfAssets         = numberOfAssets;
     
     CGImageRef posterImage      = assetsGroup.posterImage;
     size_t height               = CGImageGetHeight(posterImage);
@@ -444,7 +458,7 @@
     
     self.imageView.image        = [UIImage imageWithCGImage:posterImage scale:scale orientation:UIImageOrientationUp];
     self.textLabel.text         = [assetsGroup valueForProperty:ALAssetsGroupPropertyName];
-    self.detailTextLabel.text   = [NSString stringWithFormat:@"%d", [assetsGroup numberOfAssets]];
+    self.detailTextLabel.text   = [NSString stringWithFormat:@"%d", self.numberOfAssets];
     self.accessoryType          = UITableViewCellAccessoryDisclosureIndicator;
 }
 
@@ -452,7 +466,7 @@
 {
     NSString *label = [self.assetsGroup valueForProperty:ALAssetsGroupPropertyName];
     
-    return [label stringByAppendingFormat:NSLocalizedString(@"%d Photos", nil), [self.assetsGroup numberOfAssets]];
+    return [label stringByAppendingFormat:NSLocalizedString(@"%d Photos", nil), self.numberOfAssets];
 }
 
 @end
@@ -537,9 +551,12 @@
     else
         [self.assets removeAllObjects];
     
+    CTAssetsPickerController *picker = (CTAssetsPickerController *)self.navigationController;
+    NSPredicate *predicate = picker.filterPredicate;
+    
     ALAssetsGroupEnumerationResultsBlock resultsBlock = ^(ALAsset *asset, NSUInteger index, BOOL *stop) {
 
-        if (asset)
+        if (asset && [predicate evaluateWithObject:asset])
         {
             [self.assets addObject:asset];
             
