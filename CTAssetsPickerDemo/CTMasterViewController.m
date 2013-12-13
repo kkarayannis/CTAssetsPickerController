@@ -95,6 +95,7 @@
     CTAssetsPickerController *picker = [[CTAssetsPickerController alloc] init];
     picker.maximumNumberOfSelection = 10;
     picker.assetsFilter = [ALAssetsFilter allAssets];
+    picker.currentSelection = self.assets;
     
     // only allow video clips if they are at least 5s
     picker.selectionFilter = [NSPredicate predicateWithBlock:^BOOL(ALAsset* asset, NSDictionary *bindings) {
@@ -142,12 +143,8 @@
 
 - (void)assetsPickerController:(CTAssetsPickerController *)picker didFinishPickingAssets:(NSArray *)assets
 {
-    [self.tableView beginUpdates];
-    [self.tableView insertRowsAtIndexPaths:[self indexPathOfNewlyAddedAssets:assets]
-                          withRowAnimation:UITableViewRowAnimationBottom];
-    
-    [self.assets addObjectsFromArray:assets];
-    [self.tableView endUpdates];
+    self.assets = [NSMutableArray arrayWithArray:assets];
+    [self.tableView reloadData];
 }
 
 - (NSArray *)indexPathOfNewlyAddedAssets:(NSArray *)assets

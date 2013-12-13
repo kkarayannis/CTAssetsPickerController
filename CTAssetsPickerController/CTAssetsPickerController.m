@@ -35,6 +35,29 @@
 #define kThumbnailSize      CGSizeMake(kThumbnailLength, kThumbnailLength)
 #define kPopoverContentSize CGSizeMake(320, 480)
 
+#pragma mark - ALAsset
+
+@interface ALAsset (isEqual)
+- (NSURL*)defaultURL;
+@end
+
+@implementation ALAsset (isEqual)
+
+- (NSURL*)defaultURL {
+    return [self valueForProperty:ALAssetPropertyAssetURL];
+}
+
+- (BOOL)isEqual:(id)obj {
+    if(![obj isKindOfClass:[ALAsset class]])
+        return NO;
+    
+    NSURL *u1 = [self defaultURL];
+    NSURL *u2 = [obj defaultURL];
+    
+    return ([u1 isEqual:u2]);
+}
+
+@end
 
 #pragma mark - Interfaces
 
@@ -46,7 +69,7 @@
 
 
 @interface CTAssetsGroupViewController : UITableViewController
-
+@property (nonatomic, assign) NSArray *selectedAssets;
 @end
 
 
@@ -70,6 +93,7 @@
 @property (nonatomic, strong) NSMutableArray *assets;
 @property (nonatomic, assign) NSInteger numberOfPhotos;
 @property (nonatomic, assign) NSInteger numberOfVideos;
+@property (nonatomic, strong) NSArray *currentSelectedAssets;
 
 @end
 
@@ -139,6 +163,7 @@
         _showsCancelButton          = YES;
         _showsEmptyGroups           = NO;
         _selectionFilter            = [NSPredicate predicateWithValue:YES];
+        groupViewController.selectedAssets = self.currentSelection;
         
         if ([self respondsToSelector:@selector(setContentSizeForViewInPopover:)])
             [self setContentSizeForViewInPopover:kPopoverContentSize];
@@ -155,6 +180,11 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
+}
+
+- (void)setCurrentSelection:(NSArray *)currentSelection {
+    _currentSelection = currentSelection;
+    ((CTAssetsGroupViewController *)self.viewControllers[0]).selectedAssets = self.currentSelection;
 }
 
 @end
@@ -445,6 +475,7 @@
 {
     CTAssetsViewController *vc = [[CTAssetsViewController alloc] init];
     vc.assetsGroup = [self.groups objectAtIndex:indexPath.row];
+    vc.currentSelectedAssets = self.selectedAssets;
 
     [self.navigationController pushViewController:vc animated:YES];
 }
@@ -656,6 +687,14 @@
     ALAsset* asset = [self.assets objectAtIndex:indexPath.row];
     [cell bind:asset];
     cell.disabled = ! [picker.selectionFilter evaluateWithObject:asset];
+
+    if ([self.currentSelectedAssets containsObject:asset]) {
+        cell.selected = YES;
+        [collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+//        CTAssetsPickerController *vc = (CTAssetsPickerController *)self.navigationController;
+//        vc.indexPathsForSelectedItems = collectionView.indexPathsForSelectedItems;
+//        [self setTitleWithSelectedIndexPaths:collectionView.indexPathsForSelectedItems];
+    }
     return cell;
 }
 

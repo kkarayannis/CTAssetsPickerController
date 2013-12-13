@@ -52,6 +52,9 @@
 /// A predicate which must be true for each asset to be selectable
 @property (nonatomic, strong) NSPredicate *selectionFilter;
 
+/// The current selected photos from a previous request.
+@property (nonatomic, strong) NSArray *currentSelection;
+
 /**
  Determines whether or not the cancel button is visible in the picker
  @discussion The cancel button is visible by default. To hide the cancel button, (e.g. presenting the picker in UIPopoverController)
