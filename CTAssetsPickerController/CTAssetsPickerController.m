@@ -31,7 +31,7 @@
 #import "NSDate+TimeInterval.h"
 
 #define IS_IOS7             ([[[UIDevice currentDevice] systemVersion] compare:@"7.0" options:NSNumericSearch] != NSOrderedAscending)
-#define kThumbnailLength    78.0f
+#define kThumbnailLength    [UIScreen mainScreen].bounds.size.width/4.0 - 1.0
 #define kThumbnailSize      CGSizeMake(kThumbnailLength, kThumbnailLength)
 #define kPopoverContentSize CGSizeMake(320, 480)
 
@@ -468,7 +468,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return kThumbnailLength + 12;
+    return 78 + 12;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -507,7 +507,7 @@
     
     CGImageRef posterImage      = assetsGroup.posterImage;
     size_t height               = CGImageGetHeight(posterImage);
-    float scale                 = height / kThumbnailLength;
+    float scale                 = height / 78;
     
     self.imageView.image        = [UIImage imageWithCGImage:posterImage scale:scale orientation:UIImageOrientationUp];
     self.textLabel.text         = [assetsGroup valueForProperty:ALAssetsGroupPropertyName];
@@ -549,8 +549,8 @@
     else
     {
         self.layout.sectionInset            = UIEdgeInsetsMake(9.0, 0, 0, 0);
-        self.layout.minimumInteritemSpacing = 2.0;
-        self.layout.minimumLineSpacing      = 2.0;
+        self.layout.minimumInteritemSpacing = 1.0;
+        self.layout.minimumLineSpacing      = 1.0;
     }
     
     if (self = [super initWithCollectionViewLayout:self.layout])
@@ -601,8 +601,8 @@
     else
     {
         self.layout.sectionInset            = UIEdgeInsetsMake(9.0, 0, 0, 0);
-        self.layout.minimumInteritemSpacing = 2.0;
-        self.layout.minimumLineSpacing      = 2.0;
+        self.layout.minimumInteritemSpacing = 1.0;
+        self.layout.minimumLineSpacing      = 1.0;
     }
     
     [self.collectionView setCollectionViewLayout:self.layout animated:YES];
