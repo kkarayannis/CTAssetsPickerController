@@ -737,7 +737,7 @@
         return NO;
     }
 
-    return (selectable && collectionView.indexPathsForSelectedItems.count < vc.maximumNumberOfSelection);
+    return (selectable && (collectionView.indexPathsForSelectedItems.count < vc.maximumNumberOfSelection || vc.maximumNumberOfSelection == 0));
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
